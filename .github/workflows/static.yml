@@ -20,7 +20,7 @@ jobs:
             --access_key=${{ secrets.SCW_ACCESS_KEY }} \
             --secret_key=${{ secrets.SCW_SECRET_KEY }} \
             --host=s3.fr-par.scw.cloud \
-            --host_bucket=s3.fr-par.scw.cloud \
+            --host-bucket=s3.fr-par.scw.cloud \
             --bucket_location=fr-par
         env:
           SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
