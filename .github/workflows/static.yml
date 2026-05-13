@@ -7,12 +7,13 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install s3cmd
-        run: sudo apt-get install -y s3cmd
+        run: sudo apt-get update && sudo apt-get install -y s3cmd
 
       - name: Configure Scaleway Object Storage
         run: |
@@ -24,12 +25,35 @@ jobs:
           host_bucket = %(bucket)s.s3.fr-par.scw.cloud
           bucket_location = fr-par
           use_https = True
-          mime_type=text/css css
           EOF
-        env:
-          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
 
-      - name: Sync files to Scaleway
-        run: s3cmd sync ./ s3://landing-tbot/ --delete-removed --acl-public --guess-mime-type
+      # -------------------------
+      # 1. Upload CSS correctly
+      # -------------------------
+      - name: Upload CSS with correct MIME type
+        run: |
+          find css -name "*.css" | while read file; do
+            echo "Uploading $file with text/css"
+            s3cmd put "$file" "s3://landing-tbot/$file" \
+              --acl-public \
+              --mime-type="text/css" \
+              --no-mime-magic
+          done
 
+      # -------------------------
+      # 2. Upload everything else
+      # -------------------------
+      - name: Sync remaining files
+        run: |
+          s3cmd sync ./ s3://landing-tbot/ \
+            --delete-removed \
+            --acl-public \
+            --exclude "css/*" \
+            --guess-mime-type
+
+      # -------------------------
+      # 3. Verify deployment (debug)
+      # -------------------------
+      - name: Verify CSS headers
+        run: |
+          curl -I https://landing-tbot.s3-website.fr-par.scw.cloud/css/style.css || true
