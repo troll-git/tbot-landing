@@ -24,6 +24,7 @@ jobs:
           host_bucket = %(bucket)s.s3.fr-par.scw.cloud
           bucket_location = fr-par
           use_https = True
+          mime_type=text/css css
           EOF
         env:
           SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
