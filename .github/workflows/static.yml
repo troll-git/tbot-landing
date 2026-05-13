@@ -16,12 +16,15 @@ jobs:
 
       - name: Configure Scaleway Object Storage
         run: |
-          s3cmd --configure \
-            --access_key=${{ secrets.SCW_ACCESS_KEY }} \
-            --secret_key=${{ secrets.SCW_SECRET_KEY }} \
-            --host=s3.fr-par.scw.cloud \
-            --host_bucket=s3.fr-par.scw.cloud \
-            --bucket_location=fr-par
+          cat > ~/.s3cfg <<EOF
+          [default]
+          access_key = ${{ secrets.SCW_ACCESS_KEY }}
+          secret_key = ${{ secrets.SCW_SECRET_KEY }}
+          host_base = s3.fr-par.scw.cloud
+          host_bucket = %(bucket)s.s3.fr-par.scw.cloud
+          bucket_location = fr-par
+          use_https = True
+          EOF
         env:
           SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
           SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
