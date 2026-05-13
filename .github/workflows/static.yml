@@ -30,4 +30,5 @@ jobs:
           SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
 
       - name: Sync files to Scaleway
-        run: s3cmd sync ./ s3://landing-tbot/ --delete-removed --acl-public
+        run: s3cmd sync ./ s3://landing-tbot/ --delete-removed --acl-public --guess-mime-type
+
