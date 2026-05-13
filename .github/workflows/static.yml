@@ -1,0 +1,30 @@
+name: Deploy Landing Page to Scaleway
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install s3cmd
+        run: sudo apt-get install -y s3cmd
+
+      - name: Configure Scaleway Object Storage
+        run: |
+          s3cmd --configure \
+            --access_key=${{ secrets.SCW_ACCESS_KEY }} \
+            --secret_key=${{ secrets.SCW_SECRET_KEY }} \
+            --host=s3.fr-par.scw.cloud \
+            --host_bucket=s3.fr-par.scw.cloud \
+            --bucket_location=fr-par
+        env:
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+
+      - name: Sync files to Scaleway
+        run: s3cmd sync ./ s3://landing-tbot/ --delete-removed --acl-public
